@@ -11,7 +11,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -26,7 +26,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Alcunha {
 
 	@Id
@@ -40,7 +39,7 @@ public class Alcunha {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "codigo_pessoa")
-	@JsonIgnoreProperties("alcunhas")
+	@JsonBackReference
 	private Pessoa pessoa;
 
 }

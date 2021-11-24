@@ -70,27 +70,18 @@ public class PessoaService {
 	@Transactional
 	public Pessoa atualizar(Long codigo, Pessoa pessoa) {
 		
-		Pessoa pessoaAtualizar = buscarPessoaPeloCodigo(codigo);
+		Pessoa pessoaBD = buscarPessoaPeloCodigo(codigo);
 		
-		// Excluindo registros que não tiverem nas listas
-		List<Long> idAlcunhasARemover = new ArrayList<>();
-		for (Alcunha alcunha : pessoaAtualizar.getAlcunhas()) {
-			if (alcunha.getCodigo() != null) {
-				if (!pessoa.getAlcunhas().contains(alcunha)) {
-					idAlcunhasARemover.add(alcunha.getCodigo());
-				};
-			}
-		}
-		
-//		lancamentoRepository.deleteAll(alcunhasARemover);
+		List<Long> idLancamentosARemover = idsLancamentosARemover(pessoa, pessoaBD);
+		lancamentoRepository.deleteAllById(idLancamentosARemover);
+
+		List<Long> idAlcunhasARemover = idsAlcunhasARemover(pessoa, pessoaBD);
 		alcunhaRepository.deleteAllById(idAlcunhasARemover);
 		
-//		BeanUtils.copyProperties(pessoa, pessoaAtualizar, "codigo");
-
-		atualizandoListasComPessoa(pessoaAtualizar);
+		BeanUtils.copyProperties(pessoa, pessoaBD, "codigo");
+		atualizandoListasComPessoa(pessoaBD);
 		
-//		return pessoaRepository.save(pessoaAtualizar);
-		return pessoaAtualizar;
+		return pessoaRepository.save(pessoaBD);
 	}
 
 	public void atualizarPropriedadeAtivo(Long codigo, Boolean ativo) {
@@ -119,6 +110,46 @@ public class PessoaService {
 				alcunha.setPessoa(pessoa);
 			});
 		}
+	}
+	
+	private List<Long> idsLancamentosARemover(Pessoa pessoa, Pessoa pessoaBD) {
+		// Excluindo registros que não tiverem nas listas
+		List<Long> idLancamentosARemover = new ArrayList<>();
+		
+		pessoaBD.getLancamentos().forEach( lancamento -> {
+			if (!pessoa.getLancamentos().contains(lancamento)) {
+				idLancamentosARemover.add(lancamento.getCodigo());
+			};
+		});
+		
+//		for (Lancamento lancamento : pessoaBD.getLancamentos()) {
+//			if (lancamento.getCodigo() != null) {
+//				if (!pessoa.getLancamentos().contains(lancamento)) {
+//					idLancamentosARemover.add(lancamento.getCodigo());
+//				};
+//			}
+//		}
+		return idLancamentosARemover;
+	}
+	
+	private List<Long> idsAlcunhasARemover(Pessoa pessoa, Pessoa pessoaBD) {
+		// Excluindo registros que não tiverem nas listas
+		List<Long> idAlcunhasARemover = new ArrayList<>();
+		
+		pessoaBD.getAlcunhas().forEach( alcunha -> {
+			if (!pessoa.getAlcunhas().contains(alcunha)) {
+				idAlcunhasARemover.add(alcunha.getCodigo());
+			};
+		});
+		
+//		for (Alcunha alcunha : pessoaBD.getAlcunhas()) {
+//			if (alcunha.getCodigo() != null) {
+//				if (!pessoa.getAlcunhas().contains(alcunha)) {
+//					idAlcunhasARemover.add(alcunha.getCodigo());
+//				};
+//			}
+//		}
+		return idAlcunhasARemover;
 	}
 	
 }

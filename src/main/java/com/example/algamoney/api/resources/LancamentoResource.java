@@ -44,7 +44,7 @@ public class LancamentoResource {
 
 	@Autowired
 	private LancamentoRepository lancamentoRepository;
-
+	
 	@Autowired
 	private ApplicationEventPublisher publisher;
 	
@@ -52,9 +52,16 @@ public class LancamentoResource {
 	private MessageSource messageSource;
 
 	// Jeito mais correto pois retorna uma lista vazia se não tiver registros
+	@Transactional
 	@GetMapping
 	public List<Lancamento> findAll() {
-		return lancamentoRepository.findAll();
+		List<Lancamento> list = lancamentoRepository.findAll();
+//		list.forEach( lancamento -> Hibernate.initialize(lancamento.getPessoa()));
+//		list.forEach( lancamento -> lancamento.setPessoaL(lancamento.getPessoa()));
+//		list.forEach( lancamento -> {
+//			lancamento.setPessoaL(pessoaRepository.findById(lancamento.getPessoa().getCodigo()).get());
+//		});
+		return list;
 	}
 	
 	@Transactional
