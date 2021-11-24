@@ -51,12 +51,7 @@ public class PessoaResource {
 	@GetMapping
 	public List<Pessoa> findAll() {
 		List<Pessoa> listPessoas = pessoaRepository.findAll();
-		if (!listPessoas.isEmpty()) {
-			listPessoas.forEach((pessoa)-> {
-				Hibernate.initialize(pessoa.getLancamentos());
-				Hibernate.initialize(pessoa.getAlcunhas());
-			});
-		}
+		inicializarListas(listPessoas);
 		return listPessoas;
 	}
 
@@ -67,15 +62,19 @@ public class PessoaResource {
 	}
 
 	// Retornando um código de erro, porém, nesse caso para uma lista que estava vazia não é o mais correto
+	@Transactional
 	@GetMapping(value = "/v1")
 	public ResponseEntity<?> v1FindAll() {
 		List<Pessoa> listPessoas = pessoaRepository.findAll();
+		inicializarListas(listPessoas);
 		return listPessoas.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(listPessoas);
 	}
 
+	@Transactional
 	@GetMapping(value = "/{codigo}")
 	public ResponseEntity<Pessoa> detalhar(@PathVariable Long codigo) {
 		Pessoa pessoa = pessoaService.findById(codigo);
+		inicializarObjetos(pessoa);
 		return ResponseEntity.ok(pessoa); 
 	}
 
@@ -85,7 +84,8 @@ public class PessoaResource {
 	@Transactional
 	public ResponseEntity<Pessoa> inserir(@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
 		//		Pessoa pessoaSalva = pessoaRepository.save(pessoa);
-		Pessoa pessoaSalva = pessoaService.inserir(pessoa);
+//		Pessoa pessoaSalva = pessoaService.inserir(pessoa);
+		Pessoa pessoaSalva = pessoaService.inserirVersao2(pessoa);
 
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, pessoaSalva.getCodigo()));
 
@@ -103,21 +103,27 @@ public class PessoaResource {
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, pessoaSalva.getCodigo()));
 	}
 
+	@Transactional
 	@GetMapping(value = "findAllPorNome/{nome}")
 	public ResponseEntity<?> findAllPorNome(@PathVariable String nome) {
 		List<Pessoa> listPessoas = pessoaRepository.findByNome(nome);
+		inicializarListas(listPessoas);
 		return listPessoas.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(listPessoas);
 	}
 
+	@Transactional
 	@GetMapping(value = "findAllPorParteNome/{nome}")
 	public ResponseEntity<?> findAllPorParteNome(@PathVariable String nome) {
 		List<Pessoa> listPessoas = pessoaRepository.findByNomeContainingIgnoreCase(nome);
+		inicializarListas(listPessoas);
 		return listPessoas.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(listPessoas);
 	}
 
+	@Transactional
 	@GetMapping(value = "findAllPorParteNomeAndEnderecoNumero")
 	public ResponseEntity<?> findAllPorParteNomeAndEnderecoNumero(@RequestParam String nome, @RequestParam String enderecoNumero) {
 		List<Pessoa> listPessoas = pessoaRepository.findByNomeContainingIgnoreCaseAndEndereco_Numero(nome, enderecoNumero);
+		inicializarListas(listPessoas);
 		return listPessoas.isEmpty() ? ResponseEntity.noContent().build() : ResponseEntity.ok(listPessoas);
 	}
 
@@ -128,6 +134,7 @@ public class PessoaResource {
 	}
 
 	// Atualização total
+	@Transactional
 	@PutMapping("/{codigo}")
 	public ResponseEntity<Pessoa> atualizar(@PathVariable Long codigo, @RequestBody @Valid Pessoa pessoa) {
 		Pessoa pessoaSalva = pessoaService.atualizar(codigo, pessoa);
@@ -139,6 +146,19 @@ public class PessoaResource {
 	@ResponseStatus(code = HttpStatus.NO_CONTENT) // 204 - Deu Ok mas não preciso retorna nada
 	public void atualizarPropriedadeAtivo(@PathVariable Long codigo, @RequestBody Boolean ativo) {
 		pessoaService.atualizarPropriedadeAtivo(codigo, ativo);
+	}
+	
+	private void inicializarObjetos(Pessoa pessoa) {
+		Hibernate.initialize(pessoa.getLancamentos());
+		Hibernate.initialize(pessoa.getAlcunhas());
+	}
+	
+	private void inicializarListas(List<Pessoa> listPessoas) {
+		if (!listPessoas.isEmpty()) {
+			listPessoas.forEach( pessoa -> {
+				inicializarObjetos(pessoa);
+			});
+		}
 	}
 
 }

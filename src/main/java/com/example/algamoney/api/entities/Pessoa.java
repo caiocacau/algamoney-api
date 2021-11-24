@@ -1,5 +1,6 @@
 package com.example.algamoney.api.entities;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -49,12 +50,12 @@ public class Pessoa {
 	@NotNull
 	private Boolean ativo;
 	
-	@OneToMany(mappedBy = "pessoa", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "pessoa", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
 	@JsonIgnoreProperties("pessoa")
 //	@JsonManagedReference
 	private List<Lancamento> lancamentos;
 	
-	@OneToMany(mappedBy = "pessoa", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "pessoa", fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
 	@JsonIgnoreProperties("pessoa")
 //	@JsonManagedReference
 	private List<Alcunha> alcunhas;
@@ -79,6 +80,18 @@ public class Pessoa {
 	@Transient
 	public boolean isInativo() {
 		return !this.ativo;
+	}
+	
+	public void adiconarLancamento(Lancamento lancamento) {
+		if (lancamento != null) {
+			if (this.lancamentos == null)
+				lancamentos = new ArrayList<>();
+			
+			if (lancamento.getPessoa() == null)
+				lancamento.setPessoa(this);
+
+			lancamentos.add(lancamento);
+		}
 	}
 
 }
