@@ -32,6 +32,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+//@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Pessoa {
 
 	@Id
@@ -49,7 +50,7 @@ public class Pessoa {
 	@NotNull
 	private Boolean ativo;
 	
-	@OneToMany(mappedBy = "pessoa", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@OneToMany(mappedBy = "pessoa",  fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JsonManagedReference
 	private List<Lancamento> lancamentos;
 

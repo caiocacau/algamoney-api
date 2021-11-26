@@ -11,7 +11,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import org.hibernate.Hibernate;
 import org.springframework.util.ObjectUtils;
 
 import com.example.algamoney.api.entities.Lancamento;
@@ -37,7 +36,7 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 		
 		TypedQuery<Lancamento> query = entityManager.createQuery(criteria);
 		List<Lancamento> listLancamentos = query.getResultList();
-		listLancamentos.forEach((lancamento)-> Hibernate.initialize(lancamento.getPessoa()));
+//		listLancamentos.forEach((lancamento)-> Hibernate.initialize(lancamento.getPessoa()));
 //		for (Lancamento lancamento : listLancamentos) {
 //			Hibernate.initialize(lancamento.getPessoa());
 //		}

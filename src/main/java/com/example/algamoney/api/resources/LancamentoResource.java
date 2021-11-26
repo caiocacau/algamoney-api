@@ -1,5 +1,6 @@
 package com.example.algamoney.api.resources;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -26,6 +27,7 @@ import com.example.algamoney.api.entities.Lancamento;
 import com.example.algamoney.api.events.RecursoCriadoEvent;
 import com.example.algamoney.api.exceptions.ExceptionHandler.Erro;
 import com.example.algamoney.api.repositories.LancamentoRepository;
+import com.example.algamoney.api.repositories.dto.LancamentoDto;
 import com.example.algamoney.api.repositories.filters.LancamentoFilter;
 import com.example.algamoney.api.services.LancamentoService;
 import com.example.algamoney.api.services.exceptions.PessoaInativaException;
@@ -36,11 +38,14 @@ public class LancamentoResource {
 
 	// Acessar documentação no endereço
 	// https://docs.spring.io/spring-data/jpa/docs/
-	// A linha abaixa é a versão desse projeto no POM
+	// A linha abaixo é a versão desse projeto no POM
 	// https://docs.spring.io/spring-data/jpa/docs/2.5.6/reference/html/#reference
 
 	@Autowired
 	private LancamentoService lancamentoService;
+	
+//	@Autowired
+//	private PessoaService pessoaService;
 
 	@Autowired
 	private LancamentoRepository lancamentoRepository;
@@ -54,28 +59,35 @@ public class LancamentoResource {
 	// Jeito mais correto pois retorna uma lista vazia se não tiver registros
 	@Transactional
 	@GetMapping
-	public List<Lancamento> findAll() {
+	public List<LancamentoDto> findAll() {
 		List<Lancamento> list = lancamentoRepository.findAll();
-//		list.forEach( lancamento -> Hibernate.initialize(lancamento.getPessoa()));
-//		list.forEach( lancamento -> lancamento.setPessoaL(lancamento.getPessoa()));
-//		list.forEach( lancamento -> {
-//			lancamento.setPessoaL(pessoaRepository.findById(lancamento.getPessoa().getCodigo()).get());
-//		});
-		return list;
+		return extractedToListDto(list);
 	}
-	
+
 	@Transactional
 	@GetMapping(value = "/pesquisar")
-	public List<Lancamento> pesquisar(LancamentoFilter lancamentoFilter) {
-		return lancamentoRepository.filtrar(lancamentoFilter);
+	public List<LancamentoDto> pesquisar(LancamentoFilter lancamentoFilter) {
+		List<Lancamento> list = lancamentoRepository.filtrar(lancamentoFilter);
+		List<LancamentoDto> listDto = extractedToListDto(list);
+		return listDto;
 	}
 
+	@Transactional
 	@GetMapping(value = "/{codigo}")
-	public ResponseEntity<Lancamento> detalhar(@PathVariable Long codigo) {
+	public ResponseEntity<LancamentoDto> detalhar(@PathVariable Long codigo) {
 		Lancamento lancamento = lancamentoService.findById(codigo);
-		return ResponseEntity.ok(lancamento);
+		LancamentoDto lancamentoDto = (new LancamentoDto()).transformToDto(lancamento);
+		return ResponseEntity.ok(lancamentoDto);
 	}
-
+	
+	private List<LancamentoDto> extractedToListDto(List<Lancamento> list) {
+		List<LancamentoDto> listDto = new ArrayList<>();
+		list.forEach( lancamento -> {
+			LancamentoDto lancamentoDto = (new LancamentoDto()).transformToDto(lancamento);
+			listDto.add(lancamentoDto);
+		});
+		return listDto;
+	}
 
 	// @Valid --> Validando as anotações inseridas na entidade 
 	// Outra forma retornando o objeto Json inserido, não precisa colocar a anotação ResponseStatus(HttpStatus.CREATED)
@@ -95,7 +107,7 @@ public class LancamentoResource {
 		Lancamento lancamentoSalvo = lancamentoService.salvar(lancamento);
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, lancamentoSalvo.getCodigo())); 
 	}
-
+	
 	/* *****************************************************
 	 *
 	 * Exceção própria da classe lancamento

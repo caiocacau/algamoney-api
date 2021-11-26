@@ -40,7 +40,7 @@ public class PessoaRepositoryImpl implements PessoaRepositoryQuery {
 		
 		TypedQuery<Pessoa> query = entityManager.createQuery(criteria);
 		List<Pessoa> listPessoas = query.getResultList();
-		listPessoas.forEach((pessoa)-> {
+		listPessoas.forEach((pessoa) -> {
 				Hibernate.initialize(pessoa.getLancamentos());
 				Hibernate.initialize(pessoa.getAlcunhas());
 			});

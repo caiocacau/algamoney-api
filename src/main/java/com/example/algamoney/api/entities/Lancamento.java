@@ -1,7 +1,6 @@
 package com.example.algamoney.api.entities;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
 
 import javax.persistence.Column;
@@ -15,12 +14,9 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import com.example.algamoney.api.entities.enumerations.TipoLancamento;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -35,6 +31,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
+//@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Lancamento {
 	
 	@Id
@@ -50,9 +47,9 @@ public class Lancamento {
 	@Column(name = "data_pagamento")
 	private LocalDate dataPagamento;
 	
-	@Transient
-	@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")
-	private Instant moment;
+//	@Transient
+//	@JsonFormat(shape = Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss'Z'", timezone = "GMT")
+//	private Instant moment;
 	
 	private BigDecimal valor;
 	
@@ -70,15 +67,4 @@ public class Lancamento {
 	@JsonBackReference
 	private Pessoa pessoa;
 
-//	@ManyToOne(fetch = FetchType.LAZY)
-//	@JoinColumn(name = "codigo_pessoa", insertable = false, updatable = false)
-//	private Pessoa pessoaL;
-	
-	@Transient
-	private Pessoa pessoaL;
-	
-//	public Pessoa getPessoaL() {
-//		return this.getPessoa();
-//	}
-	
 }

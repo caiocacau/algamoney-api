@@ -43,6 +43,7 @@ public class PessoaService {
 		
 		if (!pessoa.getLancamentos().isEmpty()) {
 			List<Lancamento> lancamentos = pessoa.getLancamentos();
+//			lancamentos.forEach((lancamento)-> lancamento.setCodigoPessoa(pessoaSalva.getCodigo()));
 			lancamentos.forEach((lancamento)-> lancamento.setPessoa(pessoaSalva));
 			List<Lancamento> listLancamentos = lancamentoRepository.saveAll(lancamentos);
 			pessoaSalva.setLancamentos(listLancamentos);
@@ -99,13 +100,14 @@ public class PessoaService {
 	}
 	
 	private void atualizandoListasComPessoa(Pessoa pessoa) {
-		if (!pessoa.getLancamentos().isEmpty()) {
+		if (pessoa.getLancamentos() != null && !pessoa.getLancamentos().isEmpty()) {
 			pessoa.getLancamentos().forEach((lancamento)-> {
 				lancamento.setPessoa(pessoa);
+//				lancamento.setCodigoPessoa(pessoa.getCodigo());
 			});
 		}
 			
-		if (!pessoa.getAlcunhas().isEmpty()) {
+		if (pessoa.getAlcunhas() != null && !pessoa.getAlcunhas().isEmpty()) {
 			pessoa.getAlcunhas().forEach((alcunha)-> {
 				alcunha.setPessoa(pessoa);
 			});

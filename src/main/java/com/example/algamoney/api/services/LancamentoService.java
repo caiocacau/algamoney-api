@@ -36,6 +36,7 @@ public class LancamentoService {
 	public Lancamento salvar(Lancamento lancamento) {
 		Pessoa pessoa = null;
 		try {
+//			pessoa = pessoaService.buscarPessoaPeloCodigo(lancamento.getCodigoPessoa());
 			pessoa = pessoaService.buscarPessoaPeloCodigo(lancamento.getPessoa().getCodigo());
 		} catch (Exception e) {
 			throw new PessoaInexistenteException(e.getMessage());
