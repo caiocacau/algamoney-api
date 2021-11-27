@@ -12,8 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -63,6 +67,14 @@ public class LancamentoResource {
 		List<Lancamento> list = lancamentoRepository.findAll();
 		return extractedToListDto(list);
 	}
+	
+	// Jeito mais correto pois retorna uma lista vazia se não tiver registros
+	@Transactional
+	@GetMapping(value = "/paginado")
+	public Page<LancamentoDto> findAll(Pageable pageable) {
+		Page<Lancamento> list = lancamentoRepository.findAll(pageable);
+		return new PageImpl<>(extractedToListDto(list.toList()), pageable, list.getTotalElements());
+	}
 
 	@Transactional
 	@GetMapping(value = "/pesquisar")
@@ -70,6 +82,13 @@ public class LancamentoResource {
 		List<Lancamento> list = lancamentoRepository.filtrar(lancamentoFilter);
 		List<LancamentoDto> listDto = extractedToListDto(list);
 		return listDto;
+	}
+	
+	@Transactional
+	@GetMapping(value = "/pesquisarPaginado")
+	public Page<LancamentoDto> pesquisar(LancamentoFilter lancamentoFilter, Pageable pageable) {
+		Page<Lancamento> list = lancamentoRepository.filtrarPaginado(lancamentoFilter, pageable);
+		return new PageImpl<>(extractedToListDto(list.toList()), pageable, list.getTotalElements());
 	}
 
 	@Transactional
@@ -106,6 +125,12 @@ public class LancamentoResource {
 	public void v1Inserir(@Valid @RequestBody Lancamento lancamento, HttpServletResponse response) {
 		Lancamento lancamentoSalvo = lancamentoService.salvar(lancamento);
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, lancamentoSalvo.getCodigo())); 
+	}
+	
+	@DeleteMapping("/{codigo}")
+	@ResponseStatus(code = HttpStatus.NO_CONTENT) // 204 - Deu Ok mas não preciso retorna nada
+	public void remover(@PathVariable Long codigo) {
+		lancamentoRepository.deleteById(codigo);
 	}
 	
 	/* *****************************************************
