@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,6 +34,7 @@ import com.example.algamoney.api.exceptions.ExceptionHandler.Erro;
 import com.example.algamoney.api.repositories.LancamentoRepository;
 import com.example.algamoney.api.repositories.dto.LancamentoDto;
 import com.example.algamoney.api.repositories.filters.LancamentoFilter;
+import com.example.algamoney.api.repositories.projections.ResumoLancamento;
 import com.example.algamoney.api.services.LancamentoService;
 import com.example.algamoney.api.services.exceptions.PessoaInativaException;
 
@@ -63,6 +65,7 @@ public class LancamentoResource {
 	// Jeito mais correto pois retorna uma lista vazia se não tiver registros
 	@Transactional
 	@GetMapping
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	public List<LancamentoDto> findAll() {
 		List<Lancamento> list = lancamentoRepository.findAll();
 		return extractedToListDto(list);
@@ -71,6 +74,7 @@ public class LancamentoResource {
 	// Jeito mais correto pois retorna uma lista vazia se não tiver registros
 	@Transactional
 	@GetMapping(value = "/paginado")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	public Page<LancamentoDto> findAll(Pageable pageable) {
 		Page<Lancamento> list = lancamentoRepository.findAll(pageable);
 		return new PageImpl<>(extractedToListDto(list.toList()), pageable, list.getTotalElements());
@@ -78,6 +82,7 @@ public class LancamentoResource {
 
 	@Transactional
 	@GetMapping(value = "/pesquisar")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	public List<LancamentoDto> pesquisar(LancamentoFilter lancamentoFilter) {
 		List<Lancamento> list = lancamentoRepository.filtrar(lancamentoFilter);
 		List<LancamentoDto> listDto = extractedToListDto(list);
@@ -86,13 +91,22 @@ public class LancamentoResource {
 	
 	@Transactional
 	@GetMapping(value = "/pesquisarPaginado")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	public Page<LancamentoDto> pesquisar(LancamentoFilter lancamentoFilter, Pageable pageable) {
 		Page<Lancamento> list = lancamentoRepository.filtrarPaginado(lancamentoFilter, pageable);
 		return new PageImpl<>(extractedToListDto(list.toList()), pageable, list.getTotalElements());
 	}
+	
+	@Transactional
+	@GetMapping(params = "resumo")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
+	public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
+		return lancamentoRepository.resumir(lancamentoFilter, pageable);
+	}
 
 	@Transactional
 	@GetMapping(value = "/{codigo}")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	public ResponseEntity<LancamentoDto> detalhar(@PathVariable Long codigo) {
 		Lancamento lancamento = lancamentoService.findById(codigo);
 		LancamentoDto lancamentoDto = (new LancamentoDto()).transformToDto(lancamento);
@@ -111,6 +125,7 @@ public class LancamentoResource {
 	// @Valid --> Validando as anotações inseridas na entidade 
 	// Outra forma retornando o objeto Json inserido, não precisa colocar a anotação ResponseStatus(HttpStatus.CREATED)
 	@PostMapping
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
 	public ResponseEntity<Lancamento> inserir(@Valid @RequestBody Lancamento lancamento, HttpServletResponse response) {
 		Lancamento lancamentoSalvo = lancamentoService.salvar(lancamento);
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, lancamentoSalvo.getCodigo()));
@@ -122,6 +137,7 @@ public class LancamentoResource {
 	// Colocado a anotação ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/v1")
 	@ResponseStatus(code = HttpStatus.CREATED)
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
 	public void v1Inserir(@Valid @RequestBody Lancamento lancamento, HttpServletResponse response) {
 		Lancamento lancamentoSalvo = lancamentoService.salvar(lancamento);
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, lancamentoSalvo.getCodigo())); 
@@ -129,6 +145,7 @@ public class LancamentoResource {
 	
 	@DeleteMapping("/{codigo}")
 	@ResponseStatus(code = HttpStatus.NO_CONTENT) // 204 - Deu Ok mas não preciso retorna nada
+	@PreAuthorize("hasAuthority('ROLE_REMOVER_LANCAMENTO') and #oauth2.hasScope('write')")
 	public void remover(@PathVariable Long codigo) {
 		lancamentoRepository.deleteById(codigo);
 	}

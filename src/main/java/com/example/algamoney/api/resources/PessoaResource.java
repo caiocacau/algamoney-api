@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -50,6 +51,7 @@ public class PessoaResource {
 	// Jeito mais correto pois retorna uma lista vazia se não tiver registros
 	@Transactional
 	@GetMapping
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read')")
 	public List<PessoaDto> findAll() {
 		List<Pessoa> listPessoas = pessoaRepository.findAll();
 		return extractedToListDto(listPessoas);
@@ -57,6 +59,7 @@ public class PessoaResource {
 
 	@Transactional
 	@GetMapping(value = "/carregarPessoasFetchLancamentos")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read')")
 	public List<PessoaDto> carregarPessoaFetchLancamentos(@RequestBody PessoaFilter pessoaFilter) {
 		List<Pessoa> listPessoas = pessoaRepository.carregarPessoasFetchLancamentos(pessoaFilter);
 		return extractedToListDto(listPessoas);
@@ -65,6 +68,7 @@ public class PessoaResource {
 	// Retornando um código de erro, porém, nesse caso para uma lista que estava vazia não é o mais correto
 	@Transactional
 	@GetMapping(value = "/v1")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read')")
 	public ResponseEntity<?> v1FindAll() {
 		List<Pessoa> list = pessoaRepository.findAll();
 		List<PessoaDto> listDto = extractedToListDto(list);
@@ -73,6 +77,7 @@ public class PessoaResource {
 	
 	@Transactional
 	@GetMapping(value = "/{codigo}")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read')")
 	public ResponseEntity<PessoaDto> detalhar(@PathVariable Long codigo) {
 		Pessoa pessoa = pessoaService.findById(codigo);
 		PessoaDto pessoaDto = (new PessoaDto()).transformToDto(pessoa);
@@ -81,6 +86,7 @@ public class PessoaResource {
 	
 	@Transactional
 	@GetMapping(value = "findAllPorNome/{nome}")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read')")
 	public ResponseEntity<?> findAllPorNome(@PathVariable String nome) {
 		List<Pessoa> list = pessoaRepository.findByNome(nome);
 		List<PessoaDto> listDto = extractedToListDto(list);
@@ -89,6 +95,7 @@ public class PessoaResource {
 
 	@Transactional
 	@GetMapping(value = "findAllPorParteNome/{nome}")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read')")
 	public ResponseEntity<?> findAllPorParteNome(@PathVariable String nome) {
 		List<Pessoa> list = pessoaRepository.findByNomeContainingIgnoreCase(nome);
 		List<PessoaDto> listDto = extractedToListDto(list);
@@ -97,6 +104,7 @@ public class PessoaResource {
 
 	@Transactional
 	@GetMapping(value = "findAllPorParteNomeAndEnderecoNumero")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_PESSOA') and #oauth2.hasScope('read')")
 	public ResponseEntity<?> findAllPorParteNomeAndEnderecoNumero(@RequestParam String nome, @RequestParam String enderecoNumero) {
 		List<Pessoa> list = pessoaRepository.findByNomeContainingIgnoreCaseAndEndereco_Numero(nome, enderecoNumero);
 		List<PessoaDto> listDto = extractedToListDto(list);
@@ -107,6 +115,7 @@ public class PessoaResource {
 	// Outra forma retornando o objeto Json inserido, não precisa colocar a anotação ResponseStatus(HttpStatus.CREATED)
 	@PostMapping
 	@Transactional
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and #oauth2.hasScope('read')")
 	public ResponseEntity<Pessoa> inserir(@Valid @RequestBody PessoaDto pessoaDto, HttpServletResponse response) {
 //		Pessoa pessoaSalva = pessoaRepository.save(pessoa);
 //		Pessoa pessoaSalva = pessoaService.inserir(pessoa);
@@ -122,6 +131,7 @@ public class PessoaResource {
 	// Colocado a anotação ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(value = "/v1")
 	@ResponseStatus(code = HttpStatus.CREATED)
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and #oauth2.hasScope('read')")
 	public void v1Inserir(@Valid @RequestBody Pessoa pessoa, HttpServletResponse response) {
 		Pessoa pessoaSalva = pessoaRepository.save(pessoa);
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, pessoaSalva.getCodigo()));
@@ -130,6 +140,7 @@ public class PessoaResource {
 	// Atualização total(inclusive listas)
 	@Transactional
 	@PutMapping("/{codigo}")
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and #oauth2.hasScope('read')")
 	public ResponseEntity<Pessoa> atualizar(@PathVariable Long codigo, @RequestBody @Valid Pessoa pessoa) {
 		Pessoa pessoaSalva = pessoaService.atualizar(codigo, pessoa);
 		return ResponseEntity.ok(pessoaSalva);
@@ -138,12 +149,14 @@ public class PessoaResource {
 	// Atualização parcial
 	@PutMapping("/{codigo}/ativo")
 	@ResponseStatus(code = HttpStatus.NO_CONTENT) // 204 - Deu Ok mas não preciso retorna nada
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and #oauth2.hasScope('read')")
 	public void atualizarPropriedadeAtivo(@PathVariable Long codigo, @RequestBody Boolean ativo) {
 		pessoaService.atualizarPropriedadeAtivo(codigo, ativo);
 	}
 
 	@DeleteMapping("/{codigo}")
 	@ResponseStatus(code = HttpStatus.NO_CONTENT) // 204 - Deu Ok mas não preciso retorna nada
+	@PreAuthorize("hasAuthority('ROLE_REMOVER_PESSOA') and #oauth2.hasScope('read')")
 	public void remover(@PathVariable Long codigo) {
 		pessoaRepository.deleteById(codigo);
 	}
