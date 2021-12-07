@@ -77,7 +77,7 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 		List<Erro> erros = Arrays.asList(new Erro(mensagemUsuario, mensagemDesenvolvedor));
 		return  handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
 	}
-	
+
 	private List<Erro> listaDeErros(BindingResult bindingResult) {
 		List<Erro> erros = new ArrayList<>();
 		
