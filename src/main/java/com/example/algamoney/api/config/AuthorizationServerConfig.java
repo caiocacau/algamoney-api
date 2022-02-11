@@ -43,18 +43,19 @@ public class AuthorizationServerConfig  extends AuthorizationServerConfigurerAda
 			.secret(resourceServerConfig.passwordEncoder().encode("@ngul@r0"))
 			.scopes("read", "write")
 			.authorizedGrantTypes("password","refresh_token")
-			.accessTokenValiditySeconds(1800) // 30 minutos
+			.accessTokenValiditySeconds(60 * 20) // 20 minutos
 //			.accessTokenValiditySeconds(20) // 20 segundos
-			.refreshTokenValiditySeconds(3600 * 24)
+			.refreshTokenValiditySeconds(3600 * 24) // 1 dia
+//			.refreshTokenValiditySeconds(30) // 30 segundos
 		.and()
 			.withClient("mobile")
 //			.secret("{noop}m0b1l30")
 			.secret(resourceServerConfig.passwordEncoder().encode("m0b1l30"))
 			.scopes("read")
 			.authorizedGrantTypes("password","refresh_token")
-			.accessTokenValiditySeconds(1800) // 30 minutos
+			.accessTokenValiditySeconds(60 * 30) // 30 minutos
 //			.accessTokenValiditySeconds(20) // 20 segundos
-			.refreshTokenValiditySeconds(3600 * 24);
+			.refreshTokenValiditySeconds(3600 * 24); // 1 dia
 		
 //		clients.inMemory()
 //        .withClient("client")

@@ -38,6 +38,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 	@Override
 	public void configure(HttpSecurity http) throws Exception {
 		http.authorizeRequests()
+				.antMatchers("/test/**").permitAll()
 				.antMatchers("/categorias/**").permitAll() // Se colocar no método alguma anotação tipo @PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA')"), perde sentido
 				.anyRequest().authenticated()
 			.and()
