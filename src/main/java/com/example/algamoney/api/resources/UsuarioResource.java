@@ -1,18 +1,29 @@
 package com.example.algamoney.api.resources;
 
+import java.util.Optional;
+
+import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.algamoney.api.entities.Usuario;
+import com.example.algamoney.api.events.RecursoCriadoEvent;
 import com.example.algamoney.api.repositories.UsuarioRepository;
 import com.example.algamoney.api.repositories.filters.UsuarioFilter;
+import com.example.algamoney.api.services.UsuarioService;
 
 @RestController
 @RequestMapping("/users")
@@ -21,6 +32,12 @@ public class UsuarioResource {
 
 	@Autowired
 	private UsuarioRepository usuarioRepository;
+	
+	@Autowired
+	private UsuarioService usuarioService;
+	
+	@Autowired
+	private ApplicationEventPublisher publisher;
 
 	// Jeito mais correto pois retorna uma lista vazia se não tiver registros
 //	@CrossOrigin(maxAge = 10, origins = { "http://localhost:8000" }) // Pode ser aplicado em método
@@ -37,4 +54,19 @@ public class UsuarioResource {
 		return usuarioRepository.filtrarPaginado(usuarioFilter, pageable);
 	}
 
+	@GetMapping(value = "/{codigo}")
+//	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA') and #oauth2.hasScope('read')")
+	public Optional<Usuario> detalhar(@PathVariable Long codigo) {
+//		return usuarioRepository.findById(codigo);
+		return usuarioService.buscarUsuarioPeloCodigo(codigo);
+	}
+	
+	@PostMapping
+//	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_CATEGORIA') and #oauth2.hasScope('write')")
+	public ResponseEntity<Usuario> inserir(@Valid @RequestBody Usuario usuario, HttpServletResponse response) {
+		Usuario usuarioSalvo = usuarioService.inserir(usuario);
+		publisher.publishEvent(new RecursoCriadoEvent(this, response, usuarioSalvo.getCodigo()));
+		return ResponseEntity.status(HttpStatus.CREATED).body(usuarioSalvo);
+	}
+	
 }

@@ -40,6 +40,7 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 		http.authorizeRequests()
 				.antMatchers("/test/**").permitAll()
 				.antMatchers("/categorias/**").permitAll() // Se colocar no método alguma anotação tipo @PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA')"), perde sentido
+				.antMatchers("/permissoes/**").permitAll()
 				.anyRequest().authenticated()
 			.and()
 				.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
