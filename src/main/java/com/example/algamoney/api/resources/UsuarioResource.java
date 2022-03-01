@@ -12,13 +12,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.algamoney.api.entities.Pessoa;
 import com.example.algamoney.api.entities.Usuario;
 import com.example.algamoney.api.events.RecursoCriadoEvent;
 import com.example.algamoney.api.repositories.UsuarioRepository;
@@ -67,6 +70,15 @@ public class UsuarioResource {
 		Usuario usuarioSalvo = usuarioService.inserir(usuario);
 		publisher.publishEvent(new RecursoCriadoEvent(this, response, usuarioSalvo.getCodigo()));
 		return ResponseEntity.status(HttpStatus.CREATED).body(usuarioSalvo);
+	}
+	
+	// Atualização total(inclusive listas)
+	@Transactional
+	@PutMapping("/{codigo}")
+//	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and #oauth2.hasScope('read')")
+	public ResponseEntity<Usuario> atualizar(@PathVariable Long codigo, @RequestBody @Valid Usuario usuario) {
+		Usuario usuarioSalvo = usuarioService.atualizar(codigo, usuario);
+		return ResponseEntity.ok(usuarioSalvo);
 	}
 	
 }

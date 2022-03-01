@@ -11,7 +11,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.algamoney.api.entities.Usuario;
-import com.example.algamoney.api.repositories.PermissaoRepository;
 import com.example.algamoney.api.repositories.UsuarioRepository;
 
 @Service
@@ -19,9 +18,6 @@ public class UsuarioService {
 
 	@Autowired
 	private UsuarioRepository usuarioRepository;
-	
-	@Autowired
-	private PermissaoRepository permissaoRepository;
 	
 	public Optional<Usuario> buscarUsuarioPeloCodigo(Long codigo) {
 		Optional<Usuario> usuario = usuarioRepository.findById(codigo);
@@ -41,7 +37,7 @@ public class UsuarioService {
 	public Usuario inserir(Usuario usuario) {
 		Usuario usuarioInserir = new Usuario();
 		
-		BeanUtils.copyProperties(usuario, usuarioInserir, new String[] {"alcunhas","lancamentos"});
+		BeanUtils.copyProperties(usuario, usuarioInserir);
 		
 		// Senha
 		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -52,23 +48,17 @@ public class UsuarioService {
 		return usuarioSalvo;
 	}
 	
-//	@Transactional
-//	public Pessoa atualizar(Long codigo, Pessoa pessoa) {
-//		
-//		Pessoa pessoaBD = buscarPessoaPeloCodigo(codigo);
-//		
-//		List<Long> idLancamentosARemover = idsLancamentosARemover(pessoa, pessoaBD);
-//		lancamentoRepository.deleteAllById(idLancamentosARemover);
-//
-//		List<Long> idAlcunhasARemover = idsAlcunhasARemover(pessoa, pessoaBD);
-//		alcunhaRepository.deleteAllById(idAlcunhasARemover);
-//		
-//		BeanUtils.copyProperties(pessoa, pessoaBD, "codigo");
-//		atualizandoListasComPessoa(pessoaBD);
-//		
-//		return pessoaRepository.save(pessoaBD);
-//	}
-//
+	@Transactional
+	public Usuario atualizar(Long codigo, Usuario usuario) {
+		
+		Optional<Usuario> usuarioBDOptional = buscarUsuarioPeloCodigo(codigo);
+		Usuario usuarioBD = usuarioBDOptional.get();
+		
+		BeanUtils.copyProperties(usuario, usuarioBD, new String[] {"codigo", "senha"});
+		
+		return usuarioRepository.save(usuarioBD);
+	}
+
 //	public void atualizarPropriedadeAtivo(Long codigo, Boolean ativo) {
 //		Pessoa pessoa = buscarPessoaPeloCodigo(codigo);
 //		pessoa.setAtivo(ativo);
