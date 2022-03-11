@@ -78,6 +78,10 @@ public class UsuarioRepositoryImpl implements UsuarioRepositoryQuery {
 	//					builder.lower(root.get(Usuario_.email)), "%" + usuarioFilter.getEmail().toLowerCase() + "%")
 				);
 			}
+			
+			if (!ObjectUtils.isEmpty(usuarioFilter.getAtivos())) {
+				predicates.add(root.get("ativo").in(usuarioFilter.getAtivos()));	
+			}
 		}
 		
 		return predicates.toArray(new Predicate[predicates.size()]);

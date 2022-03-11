@@ -13,15 +13,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.algamoney.api.entities.Pessoa;
 import com.example.algamoney.api.entities.Usuario;
 import com.example.algamoney.api.events.RecursoCriadoEvent;
 import com.example.algamoney.api.repositories.UsuarioRepository;
@@ -61,7 +62,10 @@ public class UsuarioResource {
 //	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_CATEGORIA') and #oauth2.hasScope('read')")
 	public Optional<Usuario> detalhar(@PathVariable Long codigo) {
 //		return usuarioRepository.findById(codigo);
-		return usuarioService.buscarUsuarioPeloCodigo(codigo);
+		Optional<Usuario> usuarioOptional = usuarioService.buscarUsuarioPeloCodigo(codigo);
+		usuarioOptional.get().setSenha(null);
+		return usuarioOptional;
+		
 	}
 	
 	@PostMapping
@@ -79,6 +83,13 @@ public class UsuarioResource {
 	public ResponseEntity<Usuario> atualizar(@PathVariable Long codigo, @RequestBody @Valid Usuario usuario) {
 		Usuario usuarioSalvo = usuarioService.atualizar(codigo, usuario);
 		return ResponseEntity.ok(usuarioSalvo);
+	}
+	
+	@DeleteMapping("/{codigo}")
+	@ResponseStatus(code = HttpStatus.NO_CONTENT) // 204 - Deu Ok mas não preciso retorna nada
+//	@PreAuthorize("hasAuthority('ROLE_REMOVER_PESSOA') and #oauth2.hasScope('read')")
+	public void remover(@PathVariable Long codigo) {
+		usuarioRepository.deleteById(codigo);
 	}
 	
 }

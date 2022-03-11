@@ -1,5 +1,7 @@
 package com.example.algamoney.api.repositories.filters;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,5 +14,7 @@ public class UsuarioFilter {
 	private String nome;
 	
 	private String email;
+	
+	private List<String> ativos;
 	
 }

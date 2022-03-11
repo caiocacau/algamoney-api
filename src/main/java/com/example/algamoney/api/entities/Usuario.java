@@ -42,10 +42,15 @@ public class Usuario {
 	@NotNull
 	@Size(min = 3, max = 50)
 	private String email;
+
+//	Retirado por enquanto devido a regra adotada no frontend(alteração)
+//	@NotNull
+//	@Size(min = 3, max = 150)
+	private String senha;
 	
 	@NotNull
-	@Size(min = 3, max = 150)
-	private String senha;
+	@Size(max = 1)
+	private String ativo;
 
 	@ManyToMany(fetch = FetchType.EAGER)
 	@JoinTable(name = "tb_usuario_permissao", joinColumns = @JoinColumn(name = "codigo_usuario"), inverseJoinColumns = @JoinColumn(name = "codigo_permissao"))

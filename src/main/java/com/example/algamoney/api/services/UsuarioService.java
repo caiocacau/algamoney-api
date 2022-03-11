@@ -25,11 +25,6 @@ public class UsuarioService {
 			throw new EmptyResultDataAccessException(1);
 		}
 		
-		// Senha
-//		BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-//		usuario.setSenha(encoder.d(usuarioInserir.getSenha()));
-		
-//		return usuario.get();
 		return usuario;
 	}
 	
@@ -55,6 +50,12 @@ public class UsuarioService {
 		Usuario usuarioBD = usuarioBDOptional.get();
 		
 		BeanUtils.copyProperties(usuario, usuarioBD, new String[] {"codigo", "senha"});
+
+		// Senha
+		if (usuario.getSenha() != null) {
+			BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+			usuarioBD.setSenha(encoder.encode(usuario.getSenha()));
+		}
 		
 		return usuarioRepository.save(usuarioBD);
 	}
