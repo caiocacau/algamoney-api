@@ -43,8 +43,8 @@ public class AuthorizationServerConfig  extends AuthorizationServerConfigurerAda
 			.secret(resourceServerConfig.passwordEncoder().encode("@ngul@r0"))
 			.scopes("read", "write")
 			.authorizedGrantTypes("password","refresh_token")
-			.accessTokenValiditySeconds(60 * 20) // 20 minutos
-//			.accessTokenValiditySeconds(20) // 20 segundos
+//			.accessTokenValiditySeconds(60 * 20) // 20 minutos
+			.accessTokenValiditySeconds(10) // 10 segundos
 			.refreshTokenValiditySeconds(3600 * 24) // 1 dia
 //			.refreshTokenValiditySeconds(30) // 30 segundos
 		.and()

@@ -1,7 +1,8 @@
 package com.example.algamoney.api.entities;
 
-import java.util.List;
+import java.util.Set;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -34,25 +35,30 @@ public class Usuario {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@EqualsAndHashCode.Include
 	private Long codigo;
-	
+
 	@NotNull
 	@Size(min = 3, max = 50)
 	private String nome;
-	
+
 	@NotNull
 	@Size(min = 3, max = 50)
+	@Column(unique = true)
 	private String email;
 
-//	Retirado por enquanto devido a regra adotada no frontend(alteração)
-//	@NotNull
-//	@Size(min = 3, max = 150)
+	//	Retirado por enquanto devido a regra adotada no frontend(alteração)
+	//	@NotNull
+	//	@Size(min = 3, max = 150)
 	private String senha;
-	
+
 	@NotNull
 	@Size(max = 1)
 	private String ativo;
 
 	@ManyToMany(fetch = FetchType.EAGER)
-	@JoinTable(name = "tb_usuario_permissao", joinColumns = @JoinColumn(name = "codigo_usuario"), inverseJoinColumns = @JoinColumn(name = "codigo_permissao"))
-	private List<Permissao> permissoes;
+	@JoinTable(
+			name = "tb_usuario_permissao", 
+			joinColumns = @JoinColumn(name = "codigo_usuario"), 
+			inverseJoinColumns = @JoinColumn(name = "codigo_permissao")
+			)
+	private Set<Permissao> permissoes;
 }

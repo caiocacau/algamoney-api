@@ -64,7 +64,8 @@ public class ExceptionHandler extends ResponseEntityExceptionHandler {
 	@org.springframework.web.bind.annotation.ExceptionHandler({ DataIntegrityViolationException.class })
 	public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex, 
 			WebRequest request) {
-		String mensagemUsuario = messageSource.getMessage("recurso.invalido-operacao-nao-permitida", null, LocaleContextHolder.getLocale());
+		Object[] args = new Object[] { ex.getRootCause().getMessage() };
+		String mensagemUsuario = messageSource.getMessage("recurso.invalido-operacao-nao-permitida", args, LocaleContextHolder.getLocale());
 		String mensagemDesenvolvedor = ex.getRootCause().getMessage();
 		List<Erro> erros = Arrays.asList(new Erro(mensagemUsuario, mensagemDesenvolvedor));
 		return  handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
